@@ -7,14 +7,14 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"io"
+	"jAPI/common"
 	"jAPI/config"
 	"log"
 	"net/http"
 	"os"
-	"strings"
 )
 
-var CreateCmd = &cobra.Command{
+var CreateJobCmd = &cobra.Command{
 	Use:   "create",
 	Short: "create Job",
 	Long:  "Create Jenkins Job",
@@ -22,36 +22,39 @@ var CreateCmd = &cobra.Command{
 }
 
 func init() {
-	CreateCmd.Flags().StringP("xml_f", "f", "", "File xml for create Job")
-	viper.BindPFlag("xml_f", CreateCmd.Flags().Lookup("xml_f"))
+	CreateJobCmd.Flags().StringP("xml_f", "f", "", "File xml for create Job")
+	if err := viper.BindPFlag("xml_f", CreateJobCmd.Flags().Lookup("xml_f")); err != nil {
+		log.Fatalf("Failed to bind flag: %v", err)
+	}
 }
 
 func runCreateCmd(_ *cobra.Command, _ []string) {
 	cfg := config.InitConfig()
 
-	fileContents := make([]string, 0)
+	fileContents := make([]string, len(cfg.JOB))
 
-	fileContents, isFile := fileOrString(cfg)
+	fileContents, isFile := common.FileOrString(cfg)
 
 	if fileContents == nil {
-		fmt.Fprintf(os.Stdout, "%s is empty or does not exist\n", cfg.JOB)
+		log.Printf("%s is empty or does not exist\n", cfg.JOB)
 		return
 	}
 
 	if !isFile && len(fileContents) == 0 {
-		fmt.Println("Flag mode")
-		fileContents = trimString(cfg.JOB)
+		fmt.Printf("")
+		fileContents = common.TrimString(cfg.JOB)
 	}
 
 	for _, jobName := range fileContents {
+
 		xmlData, err := readXMLFile(viper.GetString("xml_f"))
 		if err != nil {
 			log.Println(err)
 			continue
 		}
 
-		if jobExists(cfg, jobName) {
-			fmt.Fprintf(os.Stdout, "%s already exists\n", jobName)
+		if common.JobExists(cfg, jobName) {
+			log.Printf("%s already exists\n", jobName)
 			continue
 		}
 
@@ -60,7 +63,7 @@ func runCreateCmd(_ *cobra.Command, _ []string) {
 			continue
 		}
 
-		fmt.Fprintf(os.Stdout, "%s created successfully\n", jobName)
+		log.Printf("%s created!\n", jobName)
 	}
 
 }
@@ -79,7 +82,9 @@ func readXMLFile(filename string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer file.Close()
+	defer func() {
+		_ = file.Close()
+	}()
 
 	xmlData, err := io.ReadAll(file)
 	if err != nil {
@@ -87,27 +92,6 @@ func readXMLFile(filename string) ([]byte, error) {
 	}
 
 	return xmlData, nil
-}
-
-func jobExists(cfg *config.Config, job string) bool {
-	client := &http.Client{}
-
-	existsURL := fmt.Sprintf("http://%s:%s/job/%s/config.xml", cfg.URL, cfg.PORT, job)
-	req, err := http.NewRequest(http.MethodGet, existsURL, nil)
-	if err != nil {
-		log.Println(err)
-		return false
-	}
-	req.Header.Add("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(cfg.USER+":"+cfg.TOKEN)))
-
-	resp, err := client.Do(req)
-	if err != nil {
-		log.Println(err)
-		return false
-	}
-	defer resp.Body.Close()
-
-	return resp.StatusCode == http.StatusOK
 }
 
 func createJob(cfg *config.Config, xmlData []byte, job string) error {
@@ -125,48 +109,13 @@ func createJob(cfg *config.Config, xmlData []byte, job string) error {
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("Failed to create job: %s", resp.Status)
+		return fmt.Errorf("failed to create job: %s", resp.Status)
 	}
 
 	return nil
-}
-
-func fileOrString(cfg *config.Config) ([]string, bool) {
-	fileInfo, err := os.Stat(cfg.JOB)
-	if err != nil {
-		log.Println(err)
-		return []string{}, false
-	}
-
-	if fileInfo.IsDir() {
-		return nil, false
-	}
-
-	file, err := os.Open(cfg.JOB)
-	if err != nil {
-		log.Println(err)
-		return nil, false
-	}
-	defer file.Close()
-
-	fileData, err := io.ReadAll(file)
-	if err != nil {
-		log.Println(err)
-		return nil, false
-	}
-
-	fileLines := strings.Split(string(fileData), "\n")
-
-	if len(fileLines) == 1 && fileLines[0] == "" {
-		return nil, false
-	}
-
-	return fileLines, true
-}
-
-func trimString(str string) []string {
-	return strings.Split(strings.TrimSpace(str), " ")
 }

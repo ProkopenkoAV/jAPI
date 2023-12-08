@@ -1,4 +1,4 @@
-package running
+package del
 
 import (
 	"encoding/base64"
@@ -10,14 +10,14 @@ import (
 	"net/http"
 )
 
-var RunJobCmd = &cobra.Command{
-	Use:   "run",
-	Short: "running Job",
-	Long:  "Running Jenkins Job",
-	Run:   rRunCmd,
+var DelJobCmd = &cobra.Command{
+	Use:   "del",
+	Short: "del Job",
+	Long:  "Delete Jenkins Job",
+	Run:   runDelCmd,
 }
 
-func rRunCmd(_ *cobra.Command, _ []string) {
+func runDelCmd(_ *cobra.Command, _ []string) {
 	cfg := config.InitConfig()
 
 	fileContents := make([]string, len(cfg.JOB))
@@ -40,19 +40,19 @@ func rRunCmd(_ *cobra.Command, _ []string) {
 			continue
 		}
 
-		if err := runJob(cfg, jobName); err != nil {
+		if err := delJob(cfg, jobName); err != nil {
 			log.Println(err)
 			continue
 		} else {
-			log.Printf("%s running!\n", jobName)
+			log.Printf("%s deleted!\n", jobName)
 		}
 	}
 }
 
-func runJob(cfg *config.Config, job string) error {
+func delJob(cfg *config.Config, job string) error {
 	client := &http.Client{}
 
-	fullURL := fmt.Sprintf("http://%s:%s/job/%s/build", cfg.URL, cfg.PORT, job)
+	fullURL := fmt.Sprintf("http://%s:%s/job/%s/doDelete", cfg.URL, cfg.PORT, job)
 	req, err := http.NewRequest(http.MethodPost, fullURL, nil)
 	if err != nil {
 		return err
@@ -67,10 +67,9 @@ func runJob(cfg *config.Config, job string) error {
 		_ = resp.Body.Close()
 	}()
 
-	if resp.StatusCode != http.StatusCreated {
-		return fmt.Errorf("failed to running job: %s", resp.Status)
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("failed to del job: %s", resp.Status)
 	}
 
 	return nil
-
 }

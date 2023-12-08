@@ -1,24 +1,26 @@
 package main
 
 import (
-	"fmt"
 	"jAPI/cmd"
 	"jAPI/cmd/create"
-	"jAPI/cmd/delete"
+	"jAPI/cmd/del"
 	"jAPI/cmd/running"
+	"log"
 )
 
 func init() {
-	fmt.Println("init...")
+	log.Println("Initializing jAPI")
 	registerCommands()
 }
 
 func registerCommands() {
 	cmd.RootCmd.AddCommand(running.RunJobCmd)
-	cmd.RootCmd.AddCommand(delete.DelJobCmd)
-	cmd.RootCmd.AddCommand(create.CreateCmd)
+	cmd.RootCmd.AddCommand(del.DelJobCmd)
+	cmd.RootCmd.AddCommand(create.CreateJobCmd)
 }
 
 func main() {
-	cmd.Execute()
+	if err := cmd.RootCmd.Execute(); err != nil {
+		log.Fatalf("Error executing command: %v", err)
+	}
 }

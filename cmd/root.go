@@ -3,16 +3,13 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"log"
 )
 
 var RootCmd = &cobra.Command{
 	Use:   "Jenkins-cli",
 	Short: "Jenkins cli client",
 	Long:  "A command line utility of Jenkins",
-}
-
-func Execute() {
-	cobra.CheckErr(RootCmd.Execute())
 }
 
 func init() {
@@ -22,9 +19,19 @@ func init() {
 	RootCmd.PersistentFlags().StringP("token", "t", "", "Jenkins token")
 	RootCmd.PersistentFlags().StringP("job", "j", "", "Job name")
 
-	viper.BindPFlag("server", RootCmd.PersistentFlags().Lookup("server"))
-	viper.BindPFlag("port", RootCmd.PersistentFlags().Lookup("port"))
-	viper.BindPFlag("user", RootCmd.PersistentFlags().Lookup("user"))
-	viper.BindPFlag("token", RootCmd.PersistentFlags().Lookup("token"))
-	viper.BindPFlag("job", RootCmd.PersistentFlags().Lookup("job"))
+	if err := viper.BindPFlag("server", RootCmd.PersistentFlags().Lookup("server")); err != nil {
+		log.Fatalf("Failed to bind flag: %v", err)
+	}
+	if err := viper.BindPFlag("port", RootCmd.PersistentFlags().Lookup("port")); err != nil {
+		log.Fatalf("Failed to bind flag: %v", err)
+	}
+	if err := viper.BindPFlag("user", RootCmd.PersistentFlags().Lookup("user")); err != nil {
+		log.Fatalf("Failed to bind flag: %v", err)
+	}
+	if err := viper.BindPFlag("token", RootCmd.PersistentFlags().Lookup("token")); err != nil {
+		log.Fatalf("Failed to bind flag: %v", err)
+	}
+	if err := viper.BindPFlag("job", RootCmd.PersistentFlags().Lookup("job")); err != nil {
+		log.Fatalf("Failed to bind flag: %v", err)
+	}
 }
