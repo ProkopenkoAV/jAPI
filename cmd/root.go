@@ -16,14 +16,15 @@ func Execute() {
 }
 
 func init() {
-	RootCmd.PersistentFlags().StringP("url", "url", "", "Jenkins URL")
-	RootCmd.PersistentFlags().StringP("port", "port", "", "Jenkins port")
-	RootCmd.PersistentFlags().StringP("user", "user", "", "Jenkins user")
-	RootCmd.PersistentFlags().StringP("token", "token", "", "Jenkins token")
+	RootCmd.PersistentFlags().StringP("server", "s", "", "Jenkins URL")
+	RootCmd.PersistentFlags().StringP("port", "p", "", "Jenkins port")
+	RootCmd.PersistentFlags().StringP("user", "u", "", "Jenkins user")
+	RootCmd.PersistentFlags().StringP("token", "t", "", "Jenkins token")
+	RootCmd.PersistentFlags().StringP("job", "j", "", "Job name")
 
-	viper.BindPFlag("url", RootCmd.PersistentFlags().Lookup("url"))
+	viper.BindPFlag("server", RootCmd.PersistentFlags().Lookup("server"))
 	viper.BindPFlag("port", RootCmd.PersistentFlags().Lookup("port"))
 	viper.BindPFlag("user", RootCmd.PersistentFlags().Lookup("user"))
 	viper.BindPFlag("token", RootCmd.PersistentFlags().Lookup("token"))
-
+	viper.BindPFlag("job", RootCmd.PersistentFlags().Lookup("job"))
 }

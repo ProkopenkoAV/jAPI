@@ -1,12 +1,26 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"jAPI/cmd"
+	"jAPI/cmd/create"
+	"jAPI/cmd/delete"
+	"jAPI/cmd/running"
+	"jAPI/config"
+)
 
-func initMain() {
+func addCommand() {
+	cmd.RootCmd.AddCommand(running.RunJobCmd)
+	cmd.RootCmd.AddCommand(delete.DelJobCmd)
+	cmd.RootCmd.AddCommand(create.CreateCmd)
+}
+
+func init() {
 	fmt.Println("Initialization OK")
-
+	addCommand()
 }
 
 func main() {
-	initMain()
+	config.InitConfig()
+	cmd.Execute()
 }
