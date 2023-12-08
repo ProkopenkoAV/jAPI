@@ -18,7 +18,7 @@ var CreateJobCmd = &cobra.Command{
 	Use:   "create",
 	Short: "create Job",
 	Long:  "Create Jenkins Job",
-	Run:   runCreateCmd,
+	Run:   runCreateCmdWrapper,
 }
 
 func init() {
@@ -28,8 +28,34 @@ func init() {
 	}
 }
 
-func runCreateCmd(_ *cobra.Command, _ []string) {
+func runCreateCmdWrapper(cmd *cobra.Command, args []string) {
+	err := runCreateCmd(cmd, args)
+	if err != nil {
+		fmt.Println(err)
+	}
+}
+
+func runCreateCmd(_ *cobra.Command, args []string) error {
 	cfg := config.InitConfig()
+
+	if len(args) > 0 {
+		for i, arg := range args {
+			switch i {
+			case 0:
+				cfg.URL = arg
+			case 1:
+				cfg.PORT = arg
+			case 2:
+				cfg.USER = arg
+			case 3:
+				cfg.TOKEN = arg
+			case 4:
+				cfg.JOB = arg
+			}
+		}
+
+	}
+	fmt.Println(cfg.USER)
 
 	fileContents := make([]string, len(cfg.JOB))
 
@@ -37,11 +63,10 @@ func runCreateCmd(_ *cobra.Command, _ []string) {
 
 	if fileContents == nil {
 		log.Printf("%s is empty or does not exist\n", cfg.JOB)
-		return
 	}
 
 	if !isFile && len(fileContents) == 0 {
-		fmt.Printf("")
+		log.Printf("No file specified, using content from command line: %s\n", cfg.JOB)
 		fileContents = common.TrimString(cfg.JOB)
 	}
 
@@ -52,7 +77,7 @@ func runCreateCmd(_ *cobra.Command, _ []string) {
 			log.Println(err)
 			continue
 		}
-
+		fmt.Println(jobName)
 		if common.JobExists(cfg, jobName) {
 			log.Printf("%s already exists\n", jobName)
 			continue
@@ -66,8 +91,10 @@ func runCreateCmd(_ *cobra.Command, _ []string) {
 		log.Printf("%s created!\n", jobName)
 	}
 
+	return nil
 }
 
+// TODO: TestRunCreateCmd not working
 func readXMLFile(filename string) ([]byte, error) {
 	fileInfo, err := os.Stat(filename)
 	if err != nil {
