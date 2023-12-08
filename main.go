@@ -6,21 +6,19 @@ import (
 	"jAPI/cmd/create"
 	"jAPI/cmd/delete"
 	"jAPI/cmd/running"
-	"jAPI/config"
 )
 
-func addCommand() {
+func init() {
+	fmt.Println("init...")
+	registerCommands()
+}
+
+func registerCommands() {
 	cmd.RootCmd.AddCommand(running.RunJobCmd)
 	cmd.RootCmd.AddCommand(delete.DelJobCmd)
 	cmd.RootCmd.AddCommand(create.CreateCmd)
 }
 
-func init() {
-	fmt.Println("Initialization OK")
-	addCommand()
-}
-
 func main() {
-	config.InitConfig()
 	cmd.Execute()
 }
