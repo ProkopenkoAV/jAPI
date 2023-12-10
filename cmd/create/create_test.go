@@ -2,7 +2,8 @@ package create
 
 import (
 	"encoding/base64"
-	"fmt"
+	"github.com/gorilla/mux"
+	"github.com/spf13/viper"
 	"io/ioutil"
 	"jAPI/config"
 	"net/http"
@@ -23,29 +24,29 @@ func TestRunCreateCmd(t *testing.T) {
 	tmpfile.Write(xmlData)
 
 	cmd := &cobra.Command{}
-	cmd.Flags().Set("xml_f", tmpfile.Name())
+	viper.Set("xml_f", tmpfile.Name())
 
-	cfg := config.InitConfig()
-	cfg.URL = "fakeURL"
-	cfg.PORT = "fakePort"
-	cfg.USER = "fakeUser"
-	cfg.TOKEN = "fakeToken"
-	cfg.JOB = "fakeJob"
-
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	r := mux.NewRouter()
+	r.HandleFunc("/createItem", func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "POST", r.Method)
-		assert.Equal(t, "/createItem?name=fakeJob", r.URL.Path)
 		assert.Equal(t, "Basic "+base64.StdEncoding.EncodeToString([]byte("fakeUser:fakeToken")), r.Header.Get("Authorization"))
 		body, _ := ioutil.ReadAll(r.Body)
 		assert.Equal(t, xmlData, body)
 		w.WriteHeader(http.StatusOK)
-	}))
+	}).Methods("POST")
+
+	server := httptest.NewServer(r)
 	defer server.Close()
 
-	cfg.URL = server.URL[7:]
-
+	cfg := config.InitConfig()
+	cfg.URL = server.URL[7:16]
+	cfg.PORT = server.URL[17:]
+	cfg.USER = "fakeUser"
+	cfg.TOKEN = "fakeToken"
+	cfg.JOB = "fakeJob"
 	configValues := []string{cfg.URL, cfg.PORT, cfg.USER, cfg.TOKEN, cfg.JOB}
-	err = runCreateCmd(cmd, configValues)
+
+	err = runCreateJob(cmd, configValues)
 	assert.NoError(t, err)
 }
 
@@ -73,17 +74,12 @@ func TestCreateJob(t *testing.T) {
 	defer server.Close()
 
 	cfg := &config.Config{
-		URL:   server.URL[7:],
+		URL:   server.URL[7:16],
 		PORT:  server.URL[17:],
 		USER:  "fakeUser",
 		TOKEN: "fakeToken",
 		JOB:   "fakeJob",
 	}
-
-	fmt.Println(server.URL[7:])
-	fmt.Println(server.URL[17:])
-
-	cfg.URL = "127.0.0.1"
 
 	err := createJob(cfg, []byte("<xml>...</xml>"), "fakeJob")
 	assert.NoError(t, err)

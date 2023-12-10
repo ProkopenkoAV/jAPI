@@ -14,25 +14,32 @@ var RunJobCmd = &cobra.Command{
 	Use:   "run",
 	Short: "running Job",
 	Long:  "Running Jenkins Job",
-	Run:   rRunCmd,
+	Run:   RunCmdWrapper,
 }
 
-func rRunCmd(_ *cobra.Command, _ []string) {
+func RunCmdWrapper(cmd *cobra.Command, args []string) {
+	err := runRunningJob(cmd, args)
+	if err != nil {
+		log.Println(err)
+	}
+}
+
+func runRunningJob(_ *cobra.Command, args []string) error {
 	cfg := config.InitConfig()
+	if len(args) > 0 {
+		cfg = config.UpdateConfigFromArgs(args)
+	}
 
 	fileContents := make([]string, len(cfg.JOB))
-
-	fileContents, isFile := common.FileOrString(cfg)
-
-	if fileContents == nil {
-		log.Printf("%s is empty or does not exist\n", cfg.JOB)
-		return
+	fileContents, isFile, err := common.FileOrString(cfg)
+	if isFile && err != nil {
+		return err
 	}
-
-	if !isFile && len(fileContents) == 0 {
-		fmt.Println("Flag mode")
+	if !isFile && err != nil {
+		log.Printf("File not found, using content from command line: %s\n", cfg.JOB)
 		fileContents = common.TrimString(cfg.JOB)
 	}
+
 	for _, jobName := range fileContents {
 
 		if !common.JobExists(cfg, jobName) {
@@ -43,10 +50,10 @@ func rRunCmd(_ *cobra.Command, _ []string) {
 		if err := runJob(cfg, jobName); err != nil {
 			log.Println(err)
 			continue
-		} else {
-			log.Printf("%s running!\n", jobName)
 		}
+		log.Printf("%s running!\n", jobName)
 	}
+	return nil
 }
 
 func runJob(cfg *config.Config, job string) error {
@@ -72,5 +79,4 @@ func runJob(cfg *config.Config, job string) error {
 	}
 
 	return nil
-
 }

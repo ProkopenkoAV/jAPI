@@ -18,7 +18,7 @@ var CreateJobCmd = &cobra.Command{
 	Use:   "create",
 	Short: "create Job",
 	Long:  "Create Jenkins Job",
-	Run:   runCreateCmdWrapper,
+	Run:   createCmdWrapper,
 }
 
 func init() {
@@ -28,45 +28,26 @@ func init() {
 	}
 }
 
-func runCreateCmdWrapper(cmd *cobra.Command, args []string) {
-	err := runCreateCmd(cmd, args)
+func createCmdWrapper(cmd *cobra.Command, args []string) {
+	err := runCreateJob(cmd, args)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 	}
 }
 
-func runCreateCmd(_ *cobra.Command, args []string) error {
+func runCreateJob(_ *cobra.Command, args []string) error {
 	cfg := config.InitConfig()
-
 	if len(args) > 0 {
-		for i, arg := range args {
-			switch i {
-			case 0:
-				cfg.URL = arg
-			case 1:
-				cfg.PORT = arg
-			case 2:
-				cfg.USER = arg
-			case 3:
-				cfg.TOKEN = arg
-			case 4:
-				cfg.JOB = arg
-			}
-		}
-
+		cfg = config.UpdateConfigFromArgs(args)
 	}
-	fmt.Println(cfg.USER)
 
 	fileContents := make([]string, len(cfg.JOB))
-
-	fileContents, isFile := common.FileOrString(cfg)
-
-	if fileContents == nil {
-		log.Printf("%s is empty or does not exist\n", cfg.JOB)
+	fileContents, isFile, err := common.FileOrString(cfg)
+	if isFile && err != nil {
+		return err
 	}
-
-	if !isFile && len(fileContents) == 0 {
-		log.Printf("No file specified, using content from command line: %s\n", cfg.JOB)
+	if !isFile && err != nil {
+		log.Printf("File not found, using content from command line: %s\n", cfg.JOB)
 		fileContents = common.TrimString(cfg.JOB)
 	}
 
@@ -77,7 +58,7 @@ func runCreateCmd(_ *cobra.Command, args []string) error {
 			log.Println(err)
 			continue
 		}
-		fmt.Println(jobName)
+
 		if common.JobExists(cfg, jobName) {
 			log.Printf("%s already exists\n", jobName)
 			continue
@@ -87,14 +68,11 @@ func runCreateCmd(_ *cobra.Command, args []string) error {
 			log.Println(err)
 			continue
 		}
-
 		log.Printf("%s created!\n", jobName)
 	}
-
 	return nil
 }
 
-// TODO: TestRunCreateCmd not working
 func readXMLFile(filename string) ([]byte, error) {
 	fileInfo, err := os.Stat(filename)
 	if err != nil {

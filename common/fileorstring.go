@@ -1,28 +1,22 @@
 package common
 
 import (
+	"fmt"
 	"io"
 	"jAPI/config"
-	"log"
 	"os"
 	"strings"
 )
 
-func FileOrString(cfg *config.Config) ([]string, bool) {
+func FileOrString(cfg *config.Config) ([]string, bool, error) {
 	fileInfo, err := os.Stat(cfg.JOB)
 	if err != nil {
-		log.Println(err)
-		return []string{}, false
+		return nil, false, fmt.Errorf("file not found: %s", cfg.JOB)
 	}
 
-	if fileInfo.IsDir() {
-		return nil, false
-	}
-
-	file, err := os.Open(cfg.JOB)
+	file, err := os.Open(fileInfo.Name())
 	if err != nil {
-		log.Println(err)
-		return nil, false
+		return nil, true, fmt.Errorf("could not open file: %s. Permission denied", cfg.JOB)
 	}
 	defer func() {
 		_ = file.Close()
@@ -30,17 +24,14 @@ func FileOrString(cfg *config.Config) ([]string, bool) {
 
 	fileData, err := io.ReadAll(file)
 	if err != nil {
-		log.Println(err)
-		return nil, false
+		return nil, true, fmt.Errorf("could not read file: %s", cfg.JOB)
 	}
-
+	if len(fileData) == 0 {
+		return nil, true, fmt.Errorf("file is empty: %s", cfg.JOB)
+	}
 	fileLines := TrimString(string(fileData))
 
-	if len(fileLines) == 1 && fileLines[0] == "" {
-		return nil, false
-	}
-
-	return fileLines, true
+	return fileLines, true, nil
 }
 
 func TrimString(str string) []string {
@@ -49,5 +40,6 @@ func TrimString(str string) []string {
 	for i, element := range elements {
 		elements[i] = strings.TrimSpace(element)
 	}
+
 	return elements
 }
