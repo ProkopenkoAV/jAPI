@@ -15,6 +15,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// TODO : fix this test
 func TestRunCreateCmd(t *testing.T) {
 	xmlData := []byte("<xml>...</xml>")
 	tmpfile, err := ioutil.TempFile("", "test.xml")
