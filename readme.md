@@ -44,7 +44,7 @@ To install Jenkins CLI, follow these steps:
 
 ## Commands
 
-`create`
+### Create
 
 The `create` command is used to create a Jenkins job.
 
@@ -52,7 +52,7 @@ The `create` command is used to create a Jenkins job.
 jcli create -s <Jenkins_URL> -p <Jenkins_Port> -u <Jenkins_User> -t <Jenkins_Token> -j <Job_Name> -f <XML_File_Path>
 ```
 
-`delete`
+### Delete
 
 The `delete` command is used to delete a Jenkins job.
 
@@ -60,7 +60,7 @@ The `delete` command is used to delete a Jenkins job.
 jcli delete -s <Jenkins_URL> -p <Jenkins_Port> -u <Jenkins_User> -t <Jenkins_Token> -j <Job_Name>
 ```
 
-`run`
+### Run
 
 The `run` command is used to running a Jenkins job.
 
