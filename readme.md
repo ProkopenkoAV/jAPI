@@ -9,9 +9,9 @@ Jenkins CLI is a command-line utility for interacting with Jenkins, providing fu
 - [Getting Started](#getting-started)
   - [Installation](#installation)
 - [Commands](#commands)
-  - [`create`](#create)
-  - [`delete`](#delete)
-  - [`run`](#run)
+  - [`create`](#create-command)
+  - [`delete`](#delete-command)
+  - [`run`](#run-command)
 - [Configuration](#configuration)
 - [Contributing](#contributing)
 
@@ -44,7 +44,7 @@ To install Jenkins CLI, follow these steps:
 
 ## Commands
 
-### Create
+`create` command
 
 The `create` command is used to create a Jenkins job.
 
@@ -52,7 +52,7 @@ The `create` command is used to create a Jenkins job.
 jcli create -s <Jenkins_URL> -p <Jenkins_Port> -u <Jenkins_User> -t <Jenkins_Token> -j <Job_Name> -f <XML_File_Path>
 ```
 
-### Delete
+`delete` command
 
 The `delete` command is used to delete a Jenkins job.
 
@@ -60,7 +60,7 @@ The `delete` command is used to delete a Jenkins job.
 jcli delete -s <Jenkins_URL> -p <Jenkins_Port> -u <Jenkins_User> -t <Jenkins_Token> -j <Job_Name>
 ```
 
-### Run
+`run` command
 
 The `run` command is used to running a Jenkins job.
 
