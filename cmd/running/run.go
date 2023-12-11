@@ -1,3 +1,4 @@
+// Package running provides a Cobra command for running Jenkins Jobs.
 package running
 
 import (
@@ -10,6 +11,7 @@ import (
 	"net/http"
 )
 
+// RunJobCmd represents the Cobra command for running Jenkins Jobs.
 var RunJobCmd = &cobra.Command{
 	Use:   "run",
 	Short: "running Job",
@@ -17,6 +19,7 @@ var RunJobCmd = &cobra.Command{
 	Run:   RunCmdWrapper,
 }
 
+// RunCmdWrapper executes the running of Jenkins Jobs.
 func RunCmdWrapper(cmd *cobra.Command, args []string) {
 	err := runRunningJob(cmd, args)
 	if err != nil {
@@ -24,6 +27,7 @@ func RunCmdWrapper(cmd *cobra.Command, args []string) {
 	}
 }
 
+// runRunningJob runs the running of Jenkins Jobs.
 func runRunningJob(_ *cobra.Command, args []string) error {
 	cfg := config.InitConfig()
 	if len(args) > 0 {
@@ -56,6 +60,7 @@ func runRunningJob(_ *cobra.Command, args []string) error {
 	return nil
 }
 
+// runJob performs the running of Jenkins Jobs.
 func runJob(cfg *config.Config, job string) error {
 	client := &http.Client{}
 

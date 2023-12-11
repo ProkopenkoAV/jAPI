@@ -1,3 +1,4 @@
+// Package del provides a Cobra command for deleting Jenkins Jobs.
 package del
 
 import (
@@ -10,13 +11,15 @@ import (
 	"net/http"
 )
 
+// DelJobCmd represents the Cobra command for deleting Jenkins Jobs.
 var DelJobCmd = &cobra.Command{
-	Use:   "del",
+	Use:   "delete",
 	Short: "del Job",
 	Long:  "Delete Jenkins Job",
 	Run:   delCmdWrapper,
 }
 
+// delCmdWrapper executes the deletion of Jenkins Jobs.
 func delCmdWrapper(cmd *cobra.Command, args []string) {
 	err := runDelJob(cmd, args)
 	if err != nil {
@@ -24,6 +27,7 @@ func delCmdWrapper(cmd *cobra.Command, args []string) {
 	}
 }
 
+// runDelJob performs the deletion of Jenkins Jobs.
 func runDelJob(_ *cobra.Command, args []string) error {
 	cfg := config.InitConfig()
 	if len(args) > 0 {
@@ -56,6 +60,7 @@ func runDelJob(_ *cobra.Command, args []string) error {
 	return nil
 }
 
+// delJob deletes Jenkins Jobs.
 func delJob(cfg *config.Config, job string) error {
 	client := &http.Client{}
 

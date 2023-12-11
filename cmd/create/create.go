@@ -1,3 +1,4 @@
+// Package create provides a Cobra command for creating Jenkins Jobs.
 package create
 
 import (
@@ -14,6 +15,7 @@ import (
 	"os"
 )
 
+// CreateJobCmd represents the Cobra command for creating Jenkins Jobs.
 var CreateJobCmd = &cobra.Command{
 	Use:   "create",
 	Short: "create Job",
@@ -21,6 +23,7 @@ var CreateJobCmd = &cobra.Command{
 	Run:   createCmdWrapper,
 }
 
+// init sets up flags for the CreateJobCmd command.
 func init() {
 	CreateJobCmd.Flags().StringP("xml_f", "f", "", "File xml for create Job")
 	if err := viper.BindPFlag("xml_f", CreateJobCmd.Flags().Lookup("xml_f")); err != nil {
@@ -28,6 +31,7 @@ func init() {
 	}
 }
 
+// createCmdWrapper executes the creation of Jenkins Jobs.
 func createCmdWrapper(cmd *cobra.Command, args []string) {
 	err := runCreateJob(cmd, args)
 	if err != nil {
@@ -35,6 +39,7 @@ func createCmdWrapper(cmd *cobra.Command, args []string) {
 	}
 }
 
+// runCreateJob performs the creation of Jenkins Jobs.
 func runCreateJob(_ *cobra.Command, args []string) error {
 	cfg := config.InitConfig()
 	if len(args) > 0 {
@@ -73,6 +78,7 @@ func runCreateJob(_ *cobra.Command, args []string) error {
 	return nil
 }
 
+// readXMLFile reads data from an XML file.
 func readXMLFile(filename string) ([]byte, error) {
 	fileInfo, err := os.Stat(filename)
 	if err != nil {
@@ -99,6 +105,7 @@ func readXMLFile(filename string) ([]byte, error) {
 	return xmlData, nil
 }
 
+// createJob creates Jenkins Jobs.
 func createJob(cfg *config.Config, xmlData []byte, job string) error {
 	client := &http.Client{}
 

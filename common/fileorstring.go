@@ -8,6 +8,7 @@ import (
 	"strings"
 )
 
+// FileOrString checks if a file exists and returns its content.
 func FileOrString(cfg *config.Config) ([]string, bool, error) {
 	fileInfo, err := os.Stat(cfg.JOB)
 	if err != nil {
@@ -34,6 +35,7 @@ func FileOrString(cfg *config.Config) ([]string, bool, error) {
 	return fileLines, true, nil
 }
 
+// TrimString trims spaces from a string.
 func TrimString(str string) []string {
 	elements := strings.Fields(str)
 

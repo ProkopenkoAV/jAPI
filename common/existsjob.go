@@ -8,6 +8,7 @@ import (
 	"net/http"
 )
 
+// JobExists checks if a job exists.
 func JobExists(cfg *config.Config, job string) bool {
 	client := &http.Client{}
 

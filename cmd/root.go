@@ -6,12 +6,14 @@ import (
 	"log"
 )
 
+// RootCmd represents the root command for the Jenkins CLI application.
 var RootCmd = &cobra.Command{
 	Use:   "Jenkins-cli",
 	Short: "Jenkins cli client",
 	Long:  "A command line utility of Jenkins",
 }
 
+// init initializes the command-line flags and binds them to configuration settings using Viper.
 func init() {
 	RootCmd.PersistentFlags().StringP("server", "s", "", "Jenkins URL")
 	RootCmd.PersistentFlags().StringP("port", "p", "", "Jenkins port")

@@ -5,6 +5,8 @@ import (
 	"log"
 )
 
+// Config represents the configuration for the Jenkins CLI application.
+// The configuration includes the url, port, user, token, and job name.
 type Config struct {
 	URL   string
 	PORT  string
@@ -13,6 +15,7 @@ type Config struct {
 	JOB   string
 }
 
+// InitConfig initializes the configuration for the Jenkins CLI application.
 func InitConfig() *Config {
 	if err := viper.BindEnv("server", "SERVER"); err != nil {
 		log.Fatalf("Error binding environment variable: %v", err)
@@ -39,6 +42,7 @@ func InitConfig() *Config {
 	}
 }
 
+// UpdateConfigFromArgs updates the configuration from command-line arguments.
 func UpdateConfigFromArgs(args []string) *Config {
 	cfg := InitConfig()
 	for i, arg := range args {
